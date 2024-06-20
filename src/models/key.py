@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 import os
+from ..exceptions.key_exists import KeyAlreadyExists
 
 
 @dataclass
@@ -15,6 +16,9 @@ class Key:
     file_name: str = 'key.bin'
 
     def save_key(self):
+        if self.key_exist:
+            print("The key already exists. Re-writing the key will make any encrypted content unsusable. No new key was registered")
+            #raise KeyAlreadyExists
         with open(self.key_path/self.file_name, 'wb') as f:
             f.write(self.content)
 
