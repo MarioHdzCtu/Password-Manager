@@ -18,5 +18,6 @@ class Key:
         with open(self.key_path/self.file_name, 'wb') as f:
             f.write(self.content)
 
-    def check_if_key_exist(self):
+    @property
+    def key_exist(self):
         return os.path.exists(self.key_path/self.file_name)
