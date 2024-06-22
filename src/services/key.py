@@ -1,15 +1,16 @@
+from typing import Any
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import PBKDF2
-from ..models import Key
+from ..models import Key, Response
+from pathlib import Path
+import toml
 
 
 class KeyService:
 
     def __init__(
             self,
-            password: str,
-            key_path: str = None,
-            key_name: str = None) -> None:
+            ) -> bool:
         """Service for creating a new local key
 
         Args:
@@ -20,14 +21,39 @@ class KeyService:
             key_name (str, optional):NOT IMPLEMENTED YET
                 The name of the key file. Defaults to 'key.bin'.
         """
-        self.password = password
-        self.__generate_salt__()
-        self.__generate_key__()
+
 
     def __generate_salt__(self):
-        self.salt = get_random_bytes(32)
+        return get_random_bytes(32)
 
-    def __generate_key__(self):
-        self.__k = PBKDF2(password=self.password, salt=self.salt, dkLen=32)
-        self.key = Key(content=self.__k)
+    def __write_toml_config__(self, key_path: str):
+        toml_dict = {
+            'key_path': key_path
+        }
+        with open('config.toml', 'w') as f:
+            toml.dump(toml_dict, f)
+
+    def generate_key(self, password: str, key_path: str = Path.home()/'Documents', key_name: str = 'key.bin'):
+        salt = self.__generate_salt__()
+        self.__k = PBKDF2(password=password, salt=salt, dkLen=32)
+        self.key = Key(
+            content=self.__k,
+            key_path=key_path,
+            file_name=key_name)
         self.key.save_key()
+        k_path = str(key_path/key_name)
+        self.__write_toml_config__(k_path)
+        return self.__k
+
+    def get_key(self):
+        with open('config.toml', 'r') as f:
+            config: dict = toml.load(f)
+        if 'key_path' not in config:
+            raise FileNotFoundError
+        key_path = config['key_path']
+        with open(key_path, 'rb') as f:
+            return f.read()
+
+
+def get_key_service():
+    return KeyService()
