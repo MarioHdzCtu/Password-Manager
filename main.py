@@ -21,7 +21,7 @@ def generate_key(
         password: str,
         key_service: KeyService = Depends(get_key_service)):
 
-    # key = key_service.generate_key(password)
+    key = key_service.generate_key(password)
     return {'msg': "Key generated correctly"}
 
 
