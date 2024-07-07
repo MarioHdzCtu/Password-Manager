@@ -45,7 +45,9 @@ def new_account(account: Account,
 def get_account(account_id: int = None,
                 cipher_service: CipherService = Depends(get_cipher_service_instance)):
     account_service = AccountService()
-    accounts: list[dict] = account_service.retrive_account()
+    accounts: list[dict] = account_service.retrive_account(account_id=account_id)
+    if not accounts:
+        return {'msg': f'No account was found with id {account_id}'}
     for account in accounts:
         account['password'] = cipher_service.decrypt_str(account['password'], iv=account['iv'])
         account['iv'] = None
