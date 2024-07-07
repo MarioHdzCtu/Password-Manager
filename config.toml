@@ -1,1 +1,2 @@
-key_path = "/home/vscode/Documents/key.bin"
+[win32]
+key_path = "C:\\Users\\mario\\Documents\\key.bin"

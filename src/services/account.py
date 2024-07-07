@@ -22,5 +22,5 @@ class AccountService:
         query = "SELECT * FROM password_mng.passwords WHERE 1=1 " + id_query
         vals = (account_id,) if account_id is not None else ()
         with db as conn:
-            res = conn.select(query=query, vals=vals)[0]
+            res: list[dict] = conn.select(query=query, vals=vals)
         return res

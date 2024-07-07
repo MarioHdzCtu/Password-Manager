@@ -1,10 +1,11 @@
+from typing import Any
 from pydantic import BaseModel
 
 
 class Account(BaseModel):
     platform: str
     username: str
-    password: str
+    password: str | bytes
     note: str | None = None
     iv: bytes | str | None = None
 
