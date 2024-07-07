@@ -4,6 +4,7 @@ from Crypto.Protocol.KDF import PBKDF2
 from ..models import Key, Response
 from pathlib import Path
 import toml
+import sys
 
 
 class KeyService:
@@ -22,16 +23,18 @@ class KeyService:
                 The name of the key file. Defaults to 'key.bin'.
         """
 
-
     def __generate_salt__(self):
         return get_random_bytes(32)
 
     def __write_toml_config__(self, key_path: str):
-        toml_dict = {
-            'key_path': key_path
+
+        toml_file = {
+            sys.platform: {
+                'key_path': key_path
+            }
         }
         with open('config.toml', 'w') as f:
-            toml.dump(toml_dict, f)
+            toml.dump(toml_file, f)
 
     def generate_key(self, password: str, key_path: str = Path.home()/'Documents', key_name: str = 'key.bin'):
         salt = self.__generate_salt__()
@@ -48,9 +51,9 @@ class KeyService:
     def get_key(self):
         with open('config.toml', 'r') as f:
             config: dict = toml.load(f)
-        if 'key_path' not in config:
+        if sys.platform not in config:
             raise FileNotFoundError
-        key_path = config['key_path']
+        key_path = config.get(sys.platform).get('key_path')
         with open(key_path, 'rb') as f:
             return f.read()
 

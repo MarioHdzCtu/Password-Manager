@@ -1,5 +1,6 @@
 from src.services import KeyService, get_key_service, CipherService, AccountService, get_cipher_service
 from src.models import Account
+from src.utils import generate_password
 from fastapi import FastAPI, Depends
 import uvicorn
 
@@ -37,19 +38,25 @@ def new_account(account: Account,
 
     account_service.save_account(account=account)
 
-    return account.username
+    return {"platform":account.platform,"username":account.username}
 
 
 @app.get('/account')
 def get_account(account_id: int = None,
                 cipher_service: CipherService = Depends(get_cipher_service_instance)):
     account_service = AccountService()
-    account: dict = account_service.retrive_account()
-    account['password'] = cipher_service.decrypt_str(account['password'], iv=account['iv'])
-    account['iv'] = None
-    account = Account(**account)
+    accounts: list[dict] = account_service.retrive_account()
+    for account in accounts:
+        account['password'] = cipher_service.decrypt_str(account['password'], iv=account['iv'])
+        account['iv'] = None
+    accounts = [Account(**account) for account in accounts]
 
-    return account
+    return accounts
+
+
+@app.post('/generate-password')
+def gen_password(lenght: int = 16):
+    return generate_password(lenght=lenght)
 
 
 if __name__ == '__main__':
