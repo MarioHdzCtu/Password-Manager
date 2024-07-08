@@ -1,7 +1,7 @@
 from src.services import KeyService, get_key_service, CipherService, AccountService, get_cipher_service
-from src.models import Account, Response
+from src.models import Account
 from src.utils import generate_password
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 import uvicorn
 
 
@@ -15,6 +15,7 @@ def get_key_service_instance():
 def get_cipher_service_instance(key_service: KeyService = Depends(get_key_service_instance)):
     key = key_service.get_key()
     return get_cipher_service(key=key)
+
 
 def get_account_service_instance():
     return AccountService()
@@ -43,8 +44,9 @@ def new_account(account: Account,
 
 @app.get('/account', status_code=200, response_model=list[Account])
 def get_account(account_id: int = None,
-                cipher_service: CipherService = Depends(get_cipher_service_instance)):
-    account_service = AccountService()
+                cipher_service: CipherService = Depends(get_cipher_service_instance),
+                account_service: AccountService = Depends(get_account_service_instance)):
+
     accounts = account_service.retrive_account(account_id=account_id)
     for account in accounts:
         account['password'] = cipher_service.decrypt_str(account['password'], iv=account['iv'])
