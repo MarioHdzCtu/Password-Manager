@@ -1,4 +1,3 @@
-from typing import Any
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import PBKDF2
 from ..models import Key, Response

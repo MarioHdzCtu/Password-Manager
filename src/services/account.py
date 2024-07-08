@@ -1,5 +1,6 @@
-from ..models import Account
+from ..models import Account, Response
 from ..database import db
+from fastapi import HTTPException
 
 
 class AccountService:
@@ -23,4 +24,6 @@ class AccountService:
         vals = (account_id,) if account_id is not None else ()
         with db as conn:
             res: list[dict] = conn.select(query=query, vals=vals)
+        if not res:
+            raise HTTPException(status_code=404, detail= f'No account was found with id {account_id}')
         return res
